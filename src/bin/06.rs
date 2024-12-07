@@ -24,7 +24,6 @@ impl Grid {
             row.iter().position(|&c| c == '^').map(|col_idx| (row_idx, col_idx))
         }).expect("One '^' must be present");
 
-        // Replace '^' with 'G'
         data[start_x][start_y] = 'G';
 
         // Facing up means decreasing x by 1 each step: Direction(-1,0)
@@ -33,12 +32,7 @@ impl Grid {
             Direction::new(-1, 0) // Up
         );
 
-        Grid {
-            width,
-            height,
-            data,
-            guard,
-        }
+        Grid { width, height, data, guard }
     }
 
     fn out_of_bounds(&self, x: isize, y: isize) -> bool {
@@ -55,28 +49,13 @@ impl Grid {
     }
 
     fn update_guard_position(&mut self) {
-        // Clear old position
         self.data[self.guard.position.x as usize][self.guard.position.y as usize] = '.';
-
-        // Move forward
         self.guard.move_forward();
-
-        // Place guard on new position
         self.data[self.guard.position.x as usize][self.guard.position.y as usize] = 'G';
     }
-
-    fn display(&self) {
-        for row in &self.data {
-            let line: String = row.iter().collect();
-            println!("{}", line);
-        }
-    }
 }
 
-struct Position {
-    x: i32,
-    y: i32,
-}
+struct Position { x: i32, y: i32 }
 
 impl Position {
     fn new(x: i32, y: i32) -> Self {
@@ -84,10 +63,7 @@ impl Position {
     }
 }
 
-struct Direction {
-    dx: i8,
-    dy: i8,
-}
+struct Direction { dx: i8, dy: i8 }
 
 impl Direction {
     fn new(dx: i8, dy: i8) -> Self {
@@ -102,10 +78,7 @@ impl Direction {
     }
 }
 
-struct Guard {
-    position: Position,
-    direction: Direction,
-}
+struct Guard { position: Position, direction: Direction }
 
 impl Guard {
     fn new(position: Position, direction: Direction) -> Self {
@@ -123,18 +96,6 @@ impl Guard {
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let input = "\
-....#.....
-.........#
-..........
-..#.......
-.......#..
-..........
-.#..^.....
-........#.
-#.........
-......#...";
-
     let mut grid = Grid::new(input);
 
     // Track visited cells
@@ -144,23 +105,18 @@ pub fn part_one(input: &str) -> Option<u32> {
     loop {
         let current_x = grid.guard.position.x as isize;
         let current_y = grid.guard.position.y as isize;
-
         let next_x = current_x + grid.guard.direction.dx as isize;
         let next_y = current_y + grid.guard.direction.dy as isize;
 
-        // Check out of bounds before moving
         if grid.out_of_bounds(next_x, next_y) {
-            // Guard leaves the mapped area
             break;
         }
 
         let next_cell = grid.get(next_x as usize, next_y as usize).unwrap();
 
         if *next_cell == '#' {
-            // Turn right
             grid.guard.rotate_right();
         } else {
-            // '.' cell: move forward
             grid.update_guard_position();
             visited.insert((grid.guard.position.x, grid.guard.position.y));
         }
